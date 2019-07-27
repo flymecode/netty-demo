@@ -1,4 +1,4 @@
-package com.xupt;
+package com.xupt.handler;
 
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
@@ -29,6 +29,6 @@ public class NettyServerHandler extends SimpleChannelInboundHandler {
         ByteBuf in = (ByteBuf) msg;
         System.out.println("Server received: " + in.toString(CharsetUtil.UTF_8));
         // 将收到的消息写个发送者，而不是冲刷出战消息
-//        channelHandlerContext.write(in);
+        // channelHandlerContext.write(in);
     }
 }

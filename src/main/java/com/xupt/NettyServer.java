@@ -1,11 +1,11 @@
 package com.xupt;
 
+import com.xupt.handler.ChildChannelHandler;
 import io.netty.bootstrap.ServerBootstrap;
 import io.netty.channel.ChannelFuture;
-import io.netty.channel.ChannelInitializer;
+import io.netty.channel.ChannelOption;
 import io.netty.channel.EventLoopGroup;
 import io.netty.channel.nio.NioEventLoopGroup;
-import io.netty.channel.socket.SocketChannel;
 import io.netty.channel.socket.nio.NioServerSocketChannel;
 
 import java.net.InetSocketAddress;
@@ -26,23 +26,23 @@ public class NettyServer {
     }
 
     private void start() throws InterruptedException {
-        final NettyServerHandler serverHandler = new NettyServerHandler();
-        EventLoopGroup group = new NioEventLoopGroup();
+
+        EventLoopGroup bossGroup = new NioEventLoopGroup();
+        EventLoopGroup workerGroup = new NioEventLoopGroup();
         try {
             ServerBootstrap bootstrap = new ServerBootstrap();
-            bootstrap.group(group)
+            bootstrap.group(bossGroup, workerGroup)
                     .channel(NioServerSocketChannel.class)
                     .localAddress(new InetSocketAddress(port))
-                    .childHandler(new ChannelInitializer<SocketChannel>() {
-                        @Override
-                        protected void initChannel(SocketChannel socketChannel) throws Exception {
-                            socketChannel.pipeline().addLast(serverHandler);
-                        }
-                    });
+                    .option(ChannelOption.SO_BACKLOG, 1024)
+                    .childHandler(new ChildChannelHandler());
+            // 绑定端口，同步等待
             ChannelFuture f = bootstrap.bind().sync();
+            // 等待服务端监听端口关闭
             f.channel().closeFuture().sync();
         } finally {
-            group.shutdownGracefully().sync();
+            bossGroup.shutdownGracefully().sync();
+            workerGroup.shutdownGracefully().sync();
         }
     }
 }

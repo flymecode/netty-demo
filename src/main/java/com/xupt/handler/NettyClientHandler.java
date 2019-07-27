@@ -1,4 +1,4 @@
-package com.xupt;
+package com.xupt.handler;
 
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
